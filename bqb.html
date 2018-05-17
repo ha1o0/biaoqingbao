@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+    <link rel="stylesheet" href="./bqb.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="text-center col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-sm-offset-4 col-lg-offset-4 col-md-offset-4">
+            <h3>表情包生成器</h3>
+            <div class="selecter">
+                <select class="selectpicker" selected>
+                    <option value="1">表情1</option>
+                    <option value="2">表情2</option>
+                    <option value="3">表情3</option>
+                    <option value="4">表情4</option>
+                    <option value="5">表情5</option>
+                    <option value="6">表情6</option>
+                    <option value="7">表情7</option>
+                </select>
+            </div>
+            <div class="original-image-div">
+                <img src="./images/1.jpg" alt="" class="original-image">
+            </div>
+            <div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="words" placeholder="输入文字" required onblur="checkWords()">
+                </div>
+                <button class="btn btn-primary preview-btn" onclick="generateBqb()">点击预览表情</button>
+                <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情包</button>
+            </div>
+            <div>
+                <canvas id="canvas">
+                    对不起你的浏览器不支持canvas，请更换浏览器
+                </canvas>
+            </div>
+            <footer class="text-center">本页面仅供娱乐，各位大佬高抬贵手</footer>
+        </div>
+    </div>
+
+    <script>
+        var wordLineHeight = 20
+        var lines = 1
+        var currentImageId = 1
+
+        $('.selectpicker').selectpicker({
+            style: 'btn-primary'
+        })
+
+        $('.selectpicker').on('changed.bs.select', function(e) {
+            currentImageId = e.target.value
+            $(".original-image").attr('src', "./images/" + currentImageId + ".jpg")
+            $(".download-btn").attr('disabled', true)
+        })
+
+        function download() {
+            saveImageData(document.getElementById('canvas').toDataURL(), new Date().getTime() + '.png')
+        }
+
+        function saveImageData(dataUrl, filename) {
+            var link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl
+            link.click();
+        }
+
+        function generateBqb() {
+            if (!checkWords()) {
+                return
+            }
+            var words = $("#words").val()
+            lines = parseInt(words.length / 22) + 1
+            var imageWidth = $(".original-image").width()
+            var imageHeight = $(".original-image").height()
+            console.log(imageHeight, imageWidth)
+            $("#canvas").attr('width', imageWidth)
+            $("#canvas").attr('height', imageHeight + 80 + lines * wordLineHeight)
+            var canvas = document.getElementById("canvas")
+            var context = canvas.getContext("2d")
+            context.fillStyle = "white"
+            context.fillRect(0, 0, imageWidth, 20)
+            context.fillRect(0, imageHeight, imageWidth, 60 + lines * wordLineHeight)
+                // draw font in black
+            context.fillStyle = "black"
+            context.font = "14pt sans-serif"
+            var startIndex = 0
+            for (var i = 0; i < lines; i++) {
+                var lineWord = ""
+                if (i < lines - 1) {
+                    lineWord = words.substr(startIndex, 20)
+                } else {
+                    lineWord = words.substring(startIndex, words.length + 1)
+                }
+                console.log(lineWord)
+                startIndex += 20
+                context.fillText(lineWord, (imageWidth - lineWord.length / 20 * imageWidth) / 2, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
+            }
+
+
+            var selectedImage = new Image()
+            selectedImage.src = "http://onetskgu4.bkt.clouddn.com/" + currentImageId + ".jpg"
+            selectedImage.setAttribute("crossOrigin", 'Anonymous')
+            selectedImage.onload = function() {
+                var mycanvas = document.getElementById("canvas")
+                var context = mycanvas.getContext("2d")
+                context.drawImage(this, 0, 20, imageWidth, imageHeight)
+            }
+
+            $(".download-btn").removeAttr('disabled')
+
+        }
+
+        function checkWords() {
+            var words = $("#words").val().toString()
+            if (words.length == 0) {
+                $(".form-group").addClass("has-error")
+                return false
+            } else {
+                $(".form-group").removeClass("has-error")
+                return true
+            }
+        }
+    </script>
+</body>
+
+</html>
