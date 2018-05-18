@@ -1,22 +1,30 @@
-body {
-    margin-top: 50px;
-}
-
-.original-image {
-    margin-top: 50px;
-    margin-bottom: 50px;
-}
-
-.original-image {
-    width: 100%;
+html {
     height: 100%;
 }
 
-canvas {
+body {
+    min-height: 100%;
+    padding: 0;
+    position: relative;
     margin-top: 50px;
-    margin-bottom: 50px;
 }
 
-footer {
+.original-image {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    height: 100%;
+    width: 100%;
+}
+
+.container-body {
+    padding-bottom: 100px;
+}
+
+.footer {
+    margin: 0 auto;
+    width: 92%;
+    position: absolute;
+    bottom: 10px;
+    height: 50px;
     color: #888888;
 }
