@@ -109,8 +109,9 @@
 
 
             var selectedImage = new Image()
-            selectedImage.src = "http://onetskgu4.bkt.clouddn.com/" + currentImageId + ".jpg"
-            selectedImage.setAttribute("crossOrigin", 'Anonymous')
+                // selectedImage.src = "http://onetskgu4.bkt.clouddn.com/" + currentImageId + ".jpg"
+            selectedImage.src = "./images/" + currentImageId + ".jpg"
+                // selectedImage.setAttribute("crossOrigin", 'Anonymous')
             selectedImage.onload = function() {
                 var mycanvas = document.getElementById("canvas")
                 var context = mycanvas.getContext("2d")
