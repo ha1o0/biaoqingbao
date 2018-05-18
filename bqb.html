@@ -39,7 +39,7 @@
                         <input type="text" class="form-control" id="words" placeholder="输入文字" required onblur="checkWords()">
                     </div>
                     <button class="btn btn-primary preview-btn" onclick="generateBqb()">点击预览表情</button>
-                    <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button>
+                    <!-- <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button> -->
                 </div>
                 <div>
                     <canvas id="canvas">
@@ -47,7 +47,7 @@
                 </canvas>
                 </div>
             </div>
-            <div class="footer">本页面仅供娱乐，各位大佬高抬贵手</div>
+            <div class="footer">本页面仅供娱乐，长按图片保存</div>
         </div>
     </div>
 
@@ -58,6 +58,7 @@
         var imageHeight = 0
         var imageWidth = 0
         var isFirstLoad = true
+        var singleLineWordLength = 20
         $(document).ready(function() {
             $('#canvas').hide()
             $('.selectpicker').selectpicker({
@@ -78,13 +79,13 @@
         }
 
         function download() {
-            var canvas = document.getElementById("canvas")
-            downloadFile(canvas.toDataURL("image/png"));
-            // var a = document.createElement('a')
-            // var event = new MouseEvent('click')
-            // a.download = new Date().getTime() + '.png'
-            // a.href = $(".original-image").attr('src')
-            // a.dispatchEvent(event)
+            // var canvas = document.getElementById("canvas")
+            // downloadFile(canvas.toDataURL("image/png"));
+            var a = document.createElement('a')
+            var event = new MouseEvent('click')
+            a.download = new Date().getTime() + '.png'
+            a.href = $(".original-image").attr('src')
+            a.dispatchEvent(event)
         }
 
         function base64Img2Blob(code) {
@@ -92,13 +93,10 @@
             var contentType = parts[0].split(':')[1];
             var raw = window.atob(parts[1]);
             var rawLength = raw.length;
-
             var uInt8Array = new Uint8Array(rawLength);
-
             for (var i = 0; i < rawLength; ++i) {
                 uInt8Array[i] = raw.charCodeAt(i);
             }
-
             return new Blob([uInt8Array], {
                 type: contentType
             });
@@ -118,7 +116,7 @@
                 return
             }
             var words = $("#words").val()
-            lines = parseInt(words.length / 22) + 1
+            lines = parseInt(words.length / singleLineWordLength) + 1
             if (isFirstLoad) {
                 imageWidth = $(".original-image").width()
                 imageHeight = $(".original-image").height()
@@ -133,18 +131,18 @@
             context.fillRect(0, imageHeight, imageWidth, 60 + lines * wordLineHeight)
 
             context.fillStyle = "black"
-            context.font = "14pt sans-serif"
+            context.font = "12pt sans-serif"
             var startIndex = 0
             for (var i = 0; i < lines; i++) {
                 var lineWord = ""
                 if (i < lines - 1) {
-                    lineWord = words.substr(startIndex, 20)
+                    lineWord = words.substr(startIndex, singleLineWordLength)
                 } else {
                     lineWord = words.substring(startIndex, words.length + 1)
                 }
                 console.log(lineWord)
-                startIndex += 20
-                context.fillText(lineWord, (imageWidth - lineWord.length / 20 * imageWidth) / 2, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
+                startIndex += singleLineWordLength
+                context.fillText(lineWord, (imageWidth - lineWord.length / singleLineWordLength * imageWidth) / 2, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
             }
 
             var selectedImage = new Image()
