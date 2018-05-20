@@ -77,13 +77,13 @@
         }
 
         function download() {
-            // var canvas = document.getElementById("canvas")
-            // downloadFile(canvas.toDataURL("image/png"))
-            var a = document.createElement('a')
-            var event = new MouseEvent('click')
-            a.download = new Date().getTime() + '.png'
-            a.href = $(".original-image").attr('src')
-            a.dispatchEvent(event)
+            var canvas = document.getElementById("canvas")
+            downloadFile(canvas.toDataURL("image/png"))
+                // var a = document.createElement('a')
+                // var event = new MouseEvent('click')
+                // a.download = new Date().getTime() + '.png'
+                // a.href = $(".original-image").attr('src')
+                // a.dispatchEvent(event)
         }
 
         function base64Img2Blob(code) {
