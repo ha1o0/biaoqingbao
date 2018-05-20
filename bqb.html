@@ -122,15 +122,11 @@
             $("#canvas").attr('height', imageHeight + 80 + lines * wordLineHeight)
             var canvas = document.getElementById("canvas")
             var context = canvas.getContext("2d")
-            context.fillStyle = "white"
-            context.fillRect(0, 0, imageWidth, 20)
-            context.fillRect(0, imageHeight, imageWidth, 60 + lines * wordLineHeight)
-
             context.fillStyle = "black"
             context.font = "12pt sans-serif"
             for (var i = 0; i < wordsSplitArr.length; i++) {
                 var lineWord = wordsSplitArr[i]
-                context.fillText(lineWord, (imageWidth - calcStringPixelsCount(lineWord, 12)) / 2 - 10, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
+                context.fillText(lineWord, (imageWidth - calcStringPixelsCount(lineWord, 12)) / 2 - 10, imageHeight + 60 + wordLineHeight * i, imageWidth - 10)
             }
 
             var selectedImage = new Image()
