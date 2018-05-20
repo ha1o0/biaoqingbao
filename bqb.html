@@ -122,6 +122,10 @@
             $("#canvas").attr('height', imageHeight + 80 + lines * wordLineHeight)
             var canvas = document.getElementById("canvas")
             var context = canvas.getContext("2d")
+            context.fillStyle = "white"
+            context.fillRect(0, 0, imageWidth, 20)
+            context.fillRect(0, imageHeight + 18, imageWidth, 62 + lines * wordLineHeight)
+
             context.fillStyle = "black"
             context.font = "12pt sans-serif"
             for (var i = 0; i < wordsSplitArr.length; i++) {
