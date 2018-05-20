@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 
     <link rel="stylesheet" href="./bqb.css">
-    <title>表情包生气气</title>
+    <title>表情包生成器</title>
 </head>
 
 <body>
@@ -20,15 +20,19 @@
         <div class="col-lg-4 col-md-4 col-sm-4 col-sm-offset-4 col-lg-offset-4 col-md-offset-4">
             <div class="container-body">
                 <h3>表情包生成器</h3>
+                <div class="alert alert-warning">图片加载中……</div>
                 <div class="selecter">
                     <select class="selectpicker" selected>
-                    <option value="1">表情1</option>
-                    <option value="2">表情2</option>
-                    <option value="3">表情3</option>
-                    <option value="4">表情4</option>
-                    <option value="5">表情5</option>
-                    <option value="6">表情6</option>
-                    <option value="7">表情7</option>
+                    <option value="1">拿小本本记下来</option>
+                    <option value="2">你再说一遍试试</option>
+                    <option value="3">你什么时候来接我呀</option>
+                    <option value="4">太污了我要拍下来</option>
+                    <option value="5">后退我开始要装逼了</option>
+                    <option value="6">食x啦你</option>
+                    <option value="7">你女盆友跟别人跑啦，长点心吧</option>
+                    <option value="8">我错在这辈子太穷</option>
+                    <option value="9">脸给你打歪</option>
+                    <option value="10">乖巧宝宝</option>
                 </select>
                 </div>
                 <div class="original-image-div">
@@ -39,7 +43,7 @@
                         <input type="text" class="form-control" id="words" placeholder="输入文字" required onblur="checkWords()">
                     </div>
                     <button class="btn btn-primary preview-btn" onclick="generateBqb()">点击预览表情</button>
-                    <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button>
+                    <!-- <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button> -->
                 </div>
                 <div>
                     <canvas id="canvas">
@@ -57,6 +61,7 @@
         var imageHeight = 0
         var imageWidth = 0
         var isFirstLoad = true
+
         $(document).ready(function() {
             $('#canvas').hide()
             $('.selectpicker').selectpicker({
@@ -64,49 +69,19 @@
             })
             $('.selectpicker').on('changed.bs.select', function(e) {
                 currentImageId = e.target.value
+                $(".alert").show()
                 $(".original-image").attr('src', "./images/" + currentImageId + ".jpg")
                 $(".download-btn").attr('disabled', true)
             })
+            $('.alert').hide()
         })
 
         function imageLoad() {
+            $('.alert').hide()
             if ($(".original-image").attr('src').length < 100) {
                 imageWidth = $(".original-image").width()
                 imageHeight = $(".original-image").height()
             }
-        }
-
-        function download() {
-            var canvas = document.getElementById("canvas")
-            downloadFile(canvas.toDataURL("image/png"))
-                // var a = document.createElement('a')
-                // var event = new MouseEvent('click')
-                // a.download = new Date().getTime() + '.png'
-                // a.href = $(".original-image").attr('src')
-                // a.dispatchEvent(event)
-        }
-
-        function base64Img2Blob(code) {
-            var parts = code.split(';base64,')
-            var contentType = parts[0].split(':')[1]
-            var raw = window.atob(parts[1])
-            var rawLength = raw.length
-            var uInt8Array = new Uint8Array(rawLength)
-            for (var i = 0; i < rawLength; ++i) {
-                uInt8Array[i] = raw.charCodeAt(i)
-            }
-            return new Blob([uInt8Array], {
-                type: contentType
-            })
-        }
-
-        function downloadFile(content) {
-            var blob = base64Img2Blob(content) //new Blob([content])
-            var a = document.createElement('a')
-            var event = new MouseEvent('click')
-            a.download = new Date().getTime() + '.png'
-            a.href = URL.createObjectURL(blob)
-            a.dispatchEvent(event)
         }
 
         function generateBqb() {
@@ -210,23 +185,6 @@
             }
 
             return stringPixelsCount
-        }
-
-        function browserRedirect() {
-            var sUserAgent = navigator.userAgent.toLowerCase()
-            var bIsIpad = sUserAgent.match(/ipad/i) == "ipad"
-            var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os"
-            var bIsMidp = sUserAgent.match(/midp/i) == "midp"
-            var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4"
-            var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb"
-            var bIsAndroid = sUserAgent.match(/android/i) == "android"
-            var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce"
-            var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile"
-            if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
-                return "phone"
-            } else {
-                return "pc"
-            }
         }
     </script>
 </body>

@@ -9,6 +9,12 @@ body {
     margin-top: 50px;
 }
 
+.alert {
+    display: flex;
+    align-items: center;
+    height: 20px;
+}
+
 .original-image {
     margin-top: 50px;
     margin-bottom: 50px;
