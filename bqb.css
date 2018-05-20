@@ -6,13 +6,19 @@ body {
     min-height: 100%;
     padding: 0;
     position: relative;
-    margin-top: 50px;
 }
 
 .alert {
     display: flex;
+    top: 20px;
+    text-align: center;
     align-items: center;
     height: 20px;
+    justify-content: center;
+}
+
+.container-body {
+    padding-bottom: 100px;
 }
 
 .original-image {
@@ -22,15 +28,10 @@ body {
     width: 100%;
 }
 
-.container-body {
-    padding-bottom: 100px;
-}
-
 .footer {
     margin: 0 auto;
     width: 92%;
     position: absolute;
-    bottom: 10px;
     height: 50px;
     color: #888888;
 }

@@ -16,11 +16,12 @@
 </head>
 
 <body>
+
     <div class="text-center col-lg-12 col-md-12 col-sm-12 container">
         <div class="col-lg-4 col-md-4 col-sm-4 col-sm-offset-4 col-lg-offset-4 col-md-offset-4">
+            <div class="alert alert-warning">图片加载中……</div>
             <div class="container-body">
                 <h3>表情包生成器</h3>
-                <div class="alert alert-warning">图片加载中……</div>
                 <div class="selecter">
                     <select class="selectpicker" selected>
                     <option value="1">拿小本本记下来</option>
@@ -51,7 +52,7 @@
                 </canvas>
                 </div>
             </div>
-            <div class="footer">本页面仅供娱乐，长按图片保存</div>
+            <div class="footer">仅供娱乐，图片长按保存</div>
         </div>
     </div>
 
@@ -69,15 +70,15 @@
             })
             $('.selectpicker').on('changed.bs.select', function(e) {
                 currentImageId = e.target.value
-                $(".alert").show()
+                $(".alert").css('opacity', 1)
                 $(".original-image").attr('src', "./images/" + currentImageId + ".jpg")
                 $(".download-btn").attr('disabled', true)
             })
-            $('.alert').hide()
+            $(".alert").css('opacity', 0)
         })
 
         function imageLoad() {
-            $('.alert').hide()
+            $(".alert").css('opacity', 0)
             if ($(".original-image").attr('src').length < 100) {
                 imageWidth = $(".original-image").width()
                 imageHeight = $(".original-image").height()
