@@ -39,7 +39,7 @@
                         <input type="text" class="form-control" id="words" placeholder="输入文字" required onblur="checkWords()">
                     </div>
                     <button class="btn btn-primary preview-btn" onclick="generateBqb()">点击预览表情</button>
-                    <!-- <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button> -->
+                    <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button>
                 </div>
                 <div>
                     <canvas id="canvas">
@@ -53,12 +53,10 @@
 
     <script>
         var wordLineHeight = 20
-        var lines = 1
         var currentImageId = 1
         var imageHeight = 0
         var imageWidth = 0
         var isFirstLoad = true
-        var singleLineWordLength = 20
         $(document).ready(function() {
             $('#canvas').hide()
             $('.selectpicker').selectpicker({
@@ -80,7 +78,7 @@
 
         function download() {
             // var canvas = document.getElementById("canvas")
-            // downloadFile(canvas.toDataURL("image/png"));
+            // downloadFile(canvas.toDataURL("image/png"))
             var a = document.createElement('a')
             var event = new MouseEvent('click')
             a.download = new Date().getTime() + '.png'
@@ -89,25 +87,25 @@
         }
 
         function base64Img2Blob(code) {
-            var parts = code.split(';base64,');
-            var contentType = parts[0].split(':')[1];
-            var raw = window.atob(parts[1]);
-            var rawLength = raw.length;
-            var uInt8Array = new Uint8Array(rawLength);
+            var parts = code.split(';base64,')
+            var contentType = parts[0].split(':')[1]
+            var raw = window.atob(parts[1])
+            var rawLength = raw.length
+            var uInt8Array = new Uint8Array(rawLength)
             for (var i = 0; i < rawLength; ++i) {
-                uInt8Array[i] = raw.charCodeAt(i);
+                uInt8Array[i] = raw.charCodeAt(i)
             }
             return new Blob([uInt8Array], {
                 type: contentType
-            });
+            })
         }
 
         function downloadFile(content) {
-            var blob = base64Img2Blob(content); //new Blob([content])
+            var blob = base64Img2Blob(content) //new Blob([content])
             var a = document.createElement('a')
             var event = new MouseEvent('click')
             a.download = new Date().getTime() + '.png'
-            a.href = URL.createObjectURL(blob);
+            a.href = URL.createObjectURL(blob)
             a.dispatchEvent(event)
         }
 
@@ -116,7 +114,30 @@
                 return
             }
             var words = $("#words").val()
-            lines = parseInt(words.length / singleLineWordLength) + 1
+            var wordsLength = 0
+            var wordsSplitArr = []
+            var startIndex = 0
+            var lines = 0
+            var singleLineWordLength = 32
+            var splitLock = false
+            for (var j = 0; j < words.length; j++) {
+                wordsLength += isChinese(words[j]) ? 2 : 1
+                if ((j > 1) && ((wordsLength % singleLineWordLength) < 2) && !splitLock) {
+                    wordsSplitArr[lines] = words.substring(startIndex, j + 1)
+                    startIndex = j + 1
+                    lines++
+                    splitLock = true
+                }
+                if ((wordsLength % singleLineWordLength) >= 2) {
+                    splitLock = false
+                }
+            }
+            if (wordsLength < singleLineWordLength) {
+                wordsSplitArr = [words]
+            } else {
+                wordsSplitArr[lines] = words.substring(startIndex)
+            }
+
             if (isFirstLoad) {
                 imageWidth = $(".original-image").width()
                 imageHeight = $(".original-image").height()
@@ -132,17 +153,9 @@
 
             context.fillStyle = "black"
             context.font = "12pt sans-serif"
-            var startIndex = 0
-            for (var i = 0; i < lines; i++) {
-                var lineWord = ""
-                if (i < lines - 1) {
-                    lineWord = words.substr(startIndex, singleLineWordLength)
-                } else {
-                    lineWord = words.substring(startIndex, words.length + 1)
-                }
-                console.log(lineWord)
-                startIndex += singleLineWordLength
-                context.fillText(lineWord, (imageWidth - lineWord.length / singleLineWordLength * imageWidth) / 2, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
+            for (var i = 0; i < wordsSplitArr.length; i++) {
+                var lineWord = wordsSplitArr[i]
+                context.fillText(lineWord, (imageWidth - calcStringPixelsCount(lineWord, 12)) / 2 - 10, imageHeight + 50 + wordLineHeight * i, imageWidth - 10)
             }
 
             var selectedImage = new Image()
@@ -159,6 +172,14 @@
 
         }
 
+        function isChinese(temp) {
+            var re = new RegExp("[\\u4E00-\\u9FFF]+", "g")
+            if (re.test(temp)) {
+                return true
+            }
+            return false
+        }
+
         function checkWords() {
             var words = $("#words").val().toString()
             if (words.length == 0) {
@@ -170,20 +191,41 @@
             }
         }
 
+        function calcStringPixelsCount(str, strFontSize) {
+            var stringCharsCount = str.length
+            var stringPixelsCount = 0
+            var elementPixelsLengthRuler = document.createElement("span")
+            elementPixelsLengthRuler.style.fontSize = strFontSize
+            elementPixelsLengthRuler.style.visibility = "hidden"
+            elementPixelsLengthRuler.style.display = "inline-block"
+            elementPixelsLengthRuler.style.wordBreak = "break-all !important" // 打断单词
+            document.body.appendChild(elementPixelsLengthRuler)
+            for (var i = 0; i < stringCharsCount; i++) {
+                if (str[i] == " ") {
+                    elementPixelsLengthRuler.innerHTML = "&nbsp;"
+                } else {
+                    elementPixelsLengthRuler.innerHTML = str[i]
+                }
+                stringPixelsCount += elementPixelsLengthRuler.offsetWidth
+            }
+
+            return stringPixelsCount
+        }
+
         function browserRedirect() {
-            var sUserAgent = navigator.userAgent.toLowerCase();
-            var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";
-            var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";
-            var bIsMidp = sUserAgent.match(/midp/i) == "midp";
-            var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
-            var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";
-            var bIsAndroid = sUserAgent.match(/android/i) == "android";
-            var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";
-            var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";
+            var sUserAgent = navigator.userAgent.toLowerCase()
+            var bIsIpad = sUserAgent.match(/ipad/i) == "ipad"
+            var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os"
+            var bIsMidp = sUserAgent.match(/midp/i) == "midp"
+            var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4"
+            var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb"
+            var bIsAndroid = sUserAgent.match(/android/i) == "android"
+            var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce"
+            var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile"
             if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
-                return "phone";
+                return "phone"
             } else {
-                return "pc";
+                return "pc"
             }
         }
     </script>
