@@ -36,7 +36,7 @@
                 </select>
                 </div>
                 <div class="original-image-div">
-                    <img src="./images/1.jpg" alt="" class="original-image" onload="imageLoad()">
+                    <img src="http://onetskgu4.bkt.clouddn.com/1.jpg" alt="" class="original-image" onload="imageLoad()">
                 </div>
                 <div>
                     <div class="form-group">
@@ -61,7 +61,7 @@
         var imageHeight = 0
         var imageWidth = 0
         var isFirstLoad = true
-
+        const DOMAIN = "http://onetskgu4.bkt.clouddn.com/"
         $(document).ready(function() {
             $('#canvas').hide()
             $('.selectpicker').selectpicker({
@@ -70,7 +70,7 @@
             $('.selectpicker').on('changed.bs.select', function(e) {
                 currentImageId = e.target.value
                 $(".alert").html('表情加载中……')
-                $(".original-image").attr('src', "./images/" + currentImageId + ".jpg")
+                $(".original-image").attr('src', DOMAIN + currentImageId + ".jpg")
                 $(".download-btn").attr('disabled', true)
             })
             $(".alert").html('表情包生成器')
@@ -135,6 +135,7 @@
 
             var selectedImage = new Image()
             selectedImage.src = "./images/" + currentImageId + ".jpg"
+            selectedImage.crossOrigin = "anonymous"
             selectedImage.onload = function() {
                 var mycanvas = document.getElementById("canvas")
                 var context = mycanvas.getContext("2d")
