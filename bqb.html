@@ -2,191 +2,299 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
-
-    <link rel="stylesheet" href="./bqb.css">
-    <title>表情包生成器</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.4.11/theme-chalk/index.css">
+  <link rel="stylesheet" href="./bqb.css">
+  <title>表情包生成器</title>
 </head>
 
 <body>
+  <el-container id="app">
+    <el-header>
+      表情包生成工具
+    </el-header>
+    <!-- <el-aside width="200px">sideBar</el-aside> -->
+    <el-main>
+      <el-select v-model="bqbValue" placeholder="请选择" @change="changeBqb">
+        <el-option v-for="item in bqbValues" :key="item.value" :label="item.label" :value="item.value"></el-option>
+      </el-select>
 
-    <div class="text-center col-lg-12 col-md-12 col-sm-12 container">
-        <div class="col-lg-4 col-md-4 col-sm-4 col-sm-offset-4 col-lg-offset-4 col-md-offset-4">
-            <div class="alert alert-warning">表情包生成器</div>
-            <div class="container-body">
-                <div class="selecter">
-                    <select class="selectpicker" selected>
-                    <option value="1">拿小本本记下来</option>
-                    <option value="2">你再说一遍试试</option>
-                    <option value="3">你什么时候来接我呀</option>
-                    <option value="4">太污了我要拍下来</option>
-                    <option value="5">后退我开始要装逼了</option>
-                    <option value="6">食x啦你</option>
-                    <option value="7">你女盆友跟别人跑啦，长点心吧</option>
-                    <option value="8">我错在这辈子太穷</option>
-                    <option value="9">脸给你打歪</option>
-                    <option value="10">乖巧宝宝</option>
-                </select>
-                </div>
-                <div class="original-image-div">
-                    <img src="./images/1.jpg" alt="" class="original-image" onload="imageLoad()">
-                </div>
-                <div>
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="words" placeholder="输入文字" required onblur="checkWords()">
-                    </div>
-                    <button class="btn btn-primary preview-btn" onclick="generateBqb()">点击预览表情</button>
-                    <!-- <button class="btn btn-primary download-btn" onclick="download()" disabled>下载表情</button> -->
-                </div>
-                <div>
-                    <canvas id="canvas">
-                    对不起你的浏览器不支持canvas，请更换浏览器
-                </canvas>
-                </div>
-            </div>
-            <div class="footer">仅供娱乐，图片长按保存</div>
-        </div>
-    </div>
+      <div class="original-image-div" ref="original-image-div">
+        <img :src="imageSrc" alt="" class="original-image" ref="original-image" v-on:load="imageLoad">
+      </div>
+      <div class="form-content">
+        <el-form :inline="true" :model="formContent" class="demo-form-inline" size="mini">
+          <el-form-item label="请输入文字">
+            <el-input v-model="formContent.words" placeholder="" type="textarea" autosize></el-input>
+          </el-form-item>
+          <el-form-item label="文字大小">
+            <el-select v-model="formContent.fontSize" placeholder="活动区域">
+              <el-option v-for="item in fontSizes" :key="item.value" :lable="item.label" :value="item.value"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文字颜色">
+            <el-color-picker v-model="formContent.color" show-alpha :predefine="predefineColors" class="color-picker"></el-color-picker>
+          </el-form-item>
+        </el-form>
+        <el-row>
+          <el-button type="primary" size="mini" plain @click="leftMove" :disabled="previewDisabled">文字左移</el-button>
+          <el-button type="danger" plain @click="generateBqb" :disabled="previewDisabled">点击预览</el-button>
+          <el-button type="primary" size="mini" plain @click="rightMove" :disabled="previewDisabled">文字右移</el-button>
+        </el-row>
 
-    <script>
-        var wordLineHeight = 20
-        var currentImageId = 1
-        var imageHeight = 0
-        var imageWidth = 0
-        var isFirstLoad = true
+      </div>
 
-        $(document).ready(function() {
-            $('#canvas').hide()
-            $('.selectpicker').selectpicker({
-                style: 'btn-primary'
-            })
-            $('.selectpicker').on('changed.bs.select', function(e) {
-                currentImageId = e.target.value
-                $(".alert").html('表情加载中……')
-                $(".original-image").attr('src', "./images/" + currentImageId + ".jpg")
-                $(".download-btn").attr('disabled', true)
-            })
-            $(".alert").html('表情包生成器')
-        })
-
-        function imageLoad() {
-            $(".alert").html('表情包生成器')
-            if ($(".original-image").attr('src').length < 100) {
-                imageWidth = $(".original-image").width()
-                imageHeight = $(".original-image").height()
-            }
+      <canvas id="canvas" ref="canvas" class="canvas" :width="canvasWidth" :height="canvasHeight" v-show="showCanvas">
+        对不起你的浏览器不支持canvas，请更换浏览器
+      </canvas>
+    </el-main>
+    <el-footer>
+      <div class="footer">仅供娱乐，图片长按保存</div>
+    </el-footer>
+  </el-container>
+  <script src="https://cdn.bootcss.com/vue/2.5.17/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.4.11/index.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          showCanvas: false,
+          formContent: {
+            color: 'rgba(255, 69, 0, 0.68)',
+            words: "",
+            fontSize: 13
+          },
+          predefineColors: [
+            '#ff4500',
+            '#ff8c00',
+            '#ffd700',
+            '#90ee90',
+            '#00ced1',
+            '#1e90ff',
+            '#c71585',
+            'rgba(255, 69, 0, 0.68)',
+            'rgb(255, 120, 0)',
+            'hsv(51, 100, 98)',
+            'hsva(120, 40, 94, 0.5)',
+            'hsl(181, 100%, 37%)',
+            'hsla(209, 100%, 56%, 0.73)',
+            '#c7158577',
+            "#000000",
+            "#888888"
+          ],
+          isFirstLoad: true,
+          imageHeight: 0,
+          imageWidth: 0,
+          canvasWidth: 0,
+          canvasHeight: 0,
+          bqbValue: "1",
+          fontSizes: [{
+            value: 12,
+            label: 12
+          }, {
+            value: 13,
+            label: 13
+          }, {
+            value: 14,
+            label: 14
+          }, {
+            value: 15,
+            label: 15
+          }, {
+            value: 16,
+            label: 16
+          }, {
+            value: 17,
+            label: 17
+          }, {
+            value: 18,
+            label: 18
+          }, {
+            value: 19,
+            label: 19
+          }, {
+            value: 20,
+            label: 20
+          }],
+          bqbValues: [{
+            value: '1',
+            label: '拿小本本记下来'
+          }, {
+            value: '2',
+            label: '你再说一遍试试'
+          }, {
+            value: '3',
+            label: '你什么时候来接我呀'
+          }, {
+            value: '4',
+            label: '太污了我要拍下来'
+          }, {
+            value: '5',
+            label: '后退我开始要装逼了'
+          }, {
+            value: '6',
+            label: '食x啦你'
+          }, {
+            value: '7',
+            label: '你女盆友跟别人跑啦，长点心吧'
+          }, {
+            value: '8',
+            label: '我错在这辈子太穷'
+          }, {
+            value: '9',
+            label: '脸给你打歪'
+          }, {
+            value: '10',
+            label: '乖巧宝宝'
+          }],
+          imageSrc: "./images/1.jpg",
+          previewDisabled: true,
+          wordLineHeight: 20,
+          xoffset: 0,
+          needLoad: true
         }
-
-        function generateBqb() {
-            if (!checkWords()) {
-                return
-            }
-            var words = $("#words").val()
-            var wordsLength = 0
-            var wordsSplitArr = []
-            var startIndex = 0
-            var lines = 0
-            var singleLineWordLength = 32
-            var splitLock = false
-            for (var j = 0; j < words.length; j++) {
-                wordsLength += isChinese(words[j]) ? 2 : 1
-                if ((j > 1) && ((wordsLength % singleLineWordLength) < 2) && !splitLock) {
-                    wordsSplitArr[lines] = words.substring(startIndex, j + 1)
-                    startIndex = j + 1
-                    lines++
-                    splitLock = true
-                }
-                if ((wordsLength % singleLineWordLength) >= 2) {
-                    splitLock = false
-                }
-            }
-            if (wordsLength < singleLineWordLength) {
-                wordsSplitArr = [words]
+      },
+      methods: {
+        leftMove() {
+          this.xoffset--
+          this.generateBqb()
+        },
+        rightMove() {
+          this.xoffset++
+          this.generateBqb()
+        },
+        calcStringPixelsCount(str, strFontSize) {
+          console.log(str)
+          var stringCharsCount = str.length
+          var stringPixelsCount = 0
+          var elementPixelsLengthRuler = document.createElement("span")
+          elementPixelsLengthRuler.style.fontSize = strFontSize
+          elementPixelsLengthRuler.style.visibility = "hidden"
+          elementPixelsLengthRuler.style.display = "inline-block"
+          elementPixelsLengthRuler.style.wordBreak = "break-all !important" // 打断单词
+          document.body.appendChild(elementPixelsLengthRuler)
+          for (var i = 0; i < stringCharsCount; i++) {
+            if (str[i] == " ") {
+              elementPixelsLengthRuler.innerHTML = "&nbsp;"
             } else {
-                wordsSplitArr[lines] = words.substring(startIndex)
+              elementPixelsLengthRuler.innerHTML = str[i]
             }
+            stringPixelsCount += elementPixelsLengthRuler.offsetWidth
+          }
 
-            if (isFirstLoad) {
-                imageWidth = $(".original-image").width()
-                imageHeight = $(".original-image").height()
-                isFirstLoad = false
+          return stringPixelsCount
+        },
+        isChinese(temp) {
+          var re = new RegExp("[\\u4E00-\\u9FFF]+", "g")
+          return re.test(temp)
+        },
+        imageLoad() {
+          let imageRef = this.$refs["original-image"]
+          console.log(imageRef.height)
+          if (this.imageSrc < 100) {
+            this.imageWidth = imageRef.width
+            this.imageHeight = imageRef.height
+          }
+          this.$message.closeAll()
+          this.previewDisabled = false
+          this.needLoad = true
+        },
+        getRows(words) {
+          return words.split('\n')
+        },
+        generateBqb() {
+          if (this.formContent.words.trim().length == 0) {
+            this.$message({
+              message: "请输入文字",
+              type: "error",
+              duration: "2000"
+            })
+            return
+          }
+          console.log(this.getRows(this.formContent.words))
+          this.wordLineHeight = 20 * (this.formContent.fontSize / 12)
+          let words = this.formContent.words
+          let wordsLength = 0
+          let wordsSplitArr = []
+          let startIndex = 0
+          let lines = 0
+          let singleLineWordLength = 30 * (12 / this.formContent.fontSize) - (this.formContent.fontSize - 12) * 0.4
+          let splitLock = false
+          for (let j = 0; j < words.length; j++) {
+            wordsLength += this.isChinese(words[j]) ? 2 : 1
+            if ((j > 1) && ((wordsLength % singleLineWordLength) < 2) && !splitLock) {
+              wordsSplitArr[lines] = words.substring(startIndex, j + 1)
+              startIndex = j + 1
+              lines++
+              splitLock = true
             }
-            $("#canvas").attr('width', imageWidth)
-            $("#canvas").attr('height', imageHeight + 80 + lines * wordLineHeight)
-            var canvas = document.getElementById("canvas")
-            var context = canvas.getContext("2d")
-            context.fillStyle = "white"
-            context.fillRect(0, 0, imageWidth, 20)
-            context.fillRect(0, imageHeight + 18, imageWidth, 62 + lines * wordLineHeight)
-
-            context.fillStyle = "black"
-            context.font = "12pt sans-serif"
-            for (var i = 0; i < wordsSplitArr.length; i++) {
-                var lineWord = wordsSplitArr[i]
-                context.fillText(lineWord, (imageWidth - calcStringPixelsCount(lineWord, 12)) / 2 - 10, imageHeight + 60 + wordLineHeight * i, imageWidth - 10)
+            if ((wordsLength % singleLineWordLength) >= 2) {
+              splitLock = false
             }
+          }
+          if (wordsLength < singleLineWordLength) {
+            wordsSplitArr = [words]
+          } else {
+            wordsSplitArr[lines] = words.substring(startIndex)
+          }
 
-            var selectedImage = new Image()
-            selectedImage.src = "./images/" + currentImageId + ".jpg"
-            selectedImage.onload = function() {
-                var mycanvas = document.getElementById("canvas")
-                var context = mycanvas.getContext("2d")
-                context.drawImage(this, 0, 20, imageWidth, imageHeight)
-                $(".original-image").attr('src', mycanvas.toDataURL())
-            }
+          if (this.isFirstLoad) {
+            this.imageWidth = this.$refs["original-image"].width
+            this.imageHeight = this.$refs["original-image"].height
+            this.isFirstLoad = false
+          }
+          let canvas = this.$refs["canvas"]
+          this.canvasWidth = this.imageWidth
+          this.canvasHeight = this.imageHeight + 80 * (this.formContent.fontSize / 12) + lines * this.wordLineHeight
 
-            $(".download-btn").removeAttr('disabled')
+          let context = canvas.getContext("2d")
+          context.fillStyle = "white"
+          context.fillRect(0, 0, this.imageWidth, this.wordLineHeight)
+          context.fillRect(0, this.imageHeight + 18 * (this.formContent.fontSize / 20), this.imageWidth, 60 * (this
+            .formContent.fontSize / 12) + lines * this.wordLineHeight)
 
+          context.fillStyle = this.formContent.color
+          context.font = `${this.formContent.fontSize}pt sans-serif`
+          for (let i = 0; i < wordsSplitArr.length; i++) {
+            console.log("lines" + i)
+            let lineWord = wordsSplitArr[i]
+            let leftOffset = (this.imageWidth - this.calcStringPixelsCount(lineWord, this.formContent.fontSize)) /
+              2 - 10 - (this.formContent.fontSize - 13) * 4 + this.xoffset
+            context.fillText(lineWord, leftOffset, this.imageHeight + 60 * (this.formContent.fontSize / 12) + this.wordLineHeight *
+              i, this.imageWidth - 10)
+          }
 
+          let selectedImage = new Image()
+          selectedImage.src = "./images/" + this.bqbValue + ".jpg"
+          selectedImage.onload = () => {
+            console.log("load")
+            context = this.$refs["canvas"].getContext("2d")
+            context.drawImage(selectedImage, 0, 20, this.imageWidth, this.imageHeight)
+            this.imageSrc = this.$refs["canvas"].toDataURL()
+          }
+          // if (this.needLoad) {
+          //   this.needLoad = false
+          //   setTimeout(this.generateBqb(), 1000)
+          // }
+        },
+        changeBqb() {
+          this.$message.closeAll()
+          this.$message({
+            message: "表情图加载中……",
+            duration: 0,
+            type: "error",
+            center: true
+          })
+          this.imageSrc = `./images/${this.bqbValue}.jpg`
+          this.previewDisabled = true
+          this.needLoad = true
         }
-
-        function isChinese(temp) {
-            var re = new RegExp("[\\u4E00-\\u9FFF]+", "g")
-            if (re.test(temp)) {
-                return true
-            }
-            return false
-        }
-
-        function checkWords() {
-            var words = $("#words").val().toString()
-            if (words.length == 0) {
-                $(".form-group").addClass("has-error")
-                return false
-            } else {
-                $(".form-group").removeClass("has-error")
-                return true
-            }
-        }
-
-        function calcStringPixelsCount(str, strFontSize) {
-            var stringCharsCount = str.length
-            var stringPixelsCount = 0
-            var elementPixelsLengthRuler = document.createElement("span")
-            elementPixelsLengthRuler.style.fontSize = strFontSize
-            elementPixelsLengthRuler.style.visibility = "hidden"
-            elementPixelsLengthRuler.style.display = "inline-block"
-            elementPixelsLengthRuler.style.wordBreak = "break-all !important" // 打断单词
-            document.body.appendChild(elementPixelsLengthRuler)
-            for (var i = 0; i < stringCharsCount; i++) {
-                if (str[i] == " ") {
-                    elementPixelsLengthRuler.innerHTML = "&nbsp;"
-                } else {
-                    elementPixelsLengthRuler.innerHTML = str[i]
-                }
-                stringPixelsCount += elementPixelsLengthRuler.offsetWidth
-            }
-
-            return stringPixelsCount
-        }
-    </script>
+      }
+    })
+  </script>
 </body>
 
 </html>
