@@ -274,11 +274,13 @@
             context = this.$refs["canvas"].getContext("2d")
             context.drawImage(selectedImage, 0, 20, this.imageWidth, this.imageHeight)
             this.imageSrc = this.$refs["canvas"].toDataURL()
+            // this.generateBqb()
+            if (this.needLoad) {
+              this.needLoad = false
+              this.generateBqb()
+            }
           }
-          // if (this.needLoad) {
-          //   this.needLoad = false
-          //   setTimeout(this.generateBqb(), 1000)
-          // }
+          
         },
         changeBqb() {
           this.$message.closeAll()
